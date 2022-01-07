@@ -22,11 +22,11 @@ source "amazon-ebs" "ubuntu" {
   }
   ssh_username = "ubuntu"
 }
+
 build {
   name = "rde"
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
 }
-
 

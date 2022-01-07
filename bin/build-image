@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/build-image"
+
+main(){
+    packer build images/rde.pkr.hcl
+}
+
+main
+
