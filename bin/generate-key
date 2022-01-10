@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/generate-key"
+
+main(){
+    ssh-keygen -t rsa -C "jesusgollonet@gmail.com" -f ./keys/rde
+}
+
+main
+

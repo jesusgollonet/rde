@@ -1,3 +1,5 @@
+keys/*
+!keys/.gitkeep
 # Local .terraform directories
 **/.terraform/*
 
