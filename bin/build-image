@@ -5,6 +5,7 @@ set -e
 echo "bin/build-image"
 
 main(){
+    packer init image/rde.pkr.hcl
     packer build images/rde.pkr.hcl
 }
 
