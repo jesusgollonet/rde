@@ -5,8 +5,17 @@ set -e
 echo "bin/build-image"
 
 main(){
+    delete_existing_ami || true
     packer init images/rde.pkr.hcl
     packer build images/rde.pkr.hcl
+}
+
+# At the moment we're specifying a hardcoded name for the AMI (rde-ami)
+# We need to delete any existing ami with that name
+delete_existing_ami(){
+    local ami_name=rde-ami
+    local ami_id=$(aws ec2 describe-images --filters Name=name,Values="$ami_name" | jq -r ".Images[0].ImageId")
+    aws ec2 deregister-image --image-id "$ami_id"
 }
 
 main
