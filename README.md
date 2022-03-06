@@ -50,6 +50,8 @@ cloud vendors.
 ## Dependencies
 - Packer >=1.7.10
 - Terraform >=1.1.7
+- aws-cli >=2.4.7
+- jq >=1.6
 
 ## Status
 WIP
