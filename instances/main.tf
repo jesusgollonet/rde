@@ -1,4 +1,11 @@
 terraform {
+  cloud {
+    organization = "jgb"
+    workspaces {
+      name = "rde"
+    }
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
