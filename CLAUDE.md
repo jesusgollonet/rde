@@ -36,6 +36,12 @@ This script:
 ```
 Creates SSH key pair in the `keys/` directory for instance access.
 
+### Check Running Status
+```bash
+./bin/is-it-running
+```
+Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI.
+
 ### Infrastructure Management
 The project uses Pulumi for infrastructure management. Pulumi commands should be run from the `instances/` directory:
 ```bash

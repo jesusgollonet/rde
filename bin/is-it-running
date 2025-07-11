@@ -1,0 +1,58 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/is-it-running"
+
+main(){
+    check_pulumi_stack
+    check_aws_instances
+}
+
+check_pulumi_stack(){
+    echo "=== Pulumi Stack Status ==="
+    if [ -d "instances" ]; then
+        cd instances
+        if pulumi stack output > /dev/null 2>&1; then
+            echo "✅ Pulumi stack exists and has outputs:"
+            pulumi stack output
+        else
+            echo "❌ No Pulumi stack outputs found"
+        fi
+        cd ..
+    else
+        echo "❌ instances/ directory not found"
+    fi
+    echo
+}
+
+check_aws_instances(){
+    local region=eu-west-3
+    
+    echo "=== AWS Instances Status ==="
+    echo "Checking for RDE instances in region: $region"
+    
+    # Check by project tag
+    local rde_instances=$(aws ec2 describe-instances \
+        --filters "Name=tag:Project,Values=rde" "Name=instance-state-name,Values=running" \
+        --region "$region" \
+        --query 'Reservations[].Instances[].{ID:InstanceId,Name:Tags[?Key==`Name`].Value|[0],State:State.Name,IP:PublicIpAddress,Type:InstanceType}' \
+        --output table)
+    
+    if [ -n "$rde_instances" ] && [ "$rde_instances" != "[]" ]; then
+        echo "✅ Found running RDE instances:"
+        echo "$rde_instances"
+    else
+        echo "❌ No running RDE instances found with Project=rde tag"
+    fi
+    
+    echo
+    echo "All running instances in $region:"
+    aws ec2 describe-instances \
+        --filters "Name=instance-state-name,Values=running" \
+        --region "$region" \
+        --query 'Reservations[].Instances[].{ID:InstanceId,Name:Tags[?Key==`Name`].Value|[0],State:State.Name,IP:PublicIpAddress,Type:InstanceType}' \
+        --output table
+}
+
+main
