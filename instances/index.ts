@@ -30,6 +30,10 @@ const sshSecurityGroup = new aws.ec2.SecurityGroup("rde-ssh", {
             cidrBlocks: ["0.0.0.0/0"],
         },
     ],
+    tags: {
+        Name: "rde-ssh-sg",
+        Project: "rde",
+    },
 }, { provider });
 
 // Create the EC2 instance
@@ -37,6 +41,10 @@ const rdeInstance = new aws.ec2.Instance("rde", {
     ami: ami,
     instanceType: "t3.micro",
     securityGroups: [sshSecurityGroup.name],
+    tags: {
+        Name: "rde-instance",
+        Project: "rde",
+    },
 }, { provider });
 
 // Export the instance ID and public IP
