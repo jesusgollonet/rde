@@ -19,7 +19,7 @@ of nice side effects:
 There are 2 main parts to this:
 - Create an image: build an AMI with all the dependencies and
   configuration baked in.
-- Spin up an instance: use terraform to turn the computer on and off.
+- Spin up an instance: use pulumi to turn the computer on and off.
 
 The current iteration is based on AWS but the implementation is portable to other
 cloud vendors.

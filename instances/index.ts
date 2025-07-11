@@ -11,10 +11,32 @@ const provider = new aws.Provider("aws-provider", {
     region: region as aws.Region,
 });
 
+// Create a security group that allows SSH access
+const sshSecurityGroup = new aws.ec2.SecurityGroup("rde-ssh", {
+    description: "Allow SSH access",
+    ingress: [
+        {
+            protocol: "tcp",
+            fromPort: 22,
+            toPort: 22,
+            cidrBlocks: ["0.0.0.0/0"],
+        },
+    ],
+    egress: [
+        {
+            protocol: "-1",
+            fromPort: 0,
+            toPort: 0,
+            cidrBlocks: ["0.0.0.0/0"],
+        },
+    ],
+}, { provider });
+
 // Create the EC2 instance
 const rdeInstance = new aws.ec2.Instance("rde", {
     ami: ami,
     instanceType: "t3.micro",
+    securityGroups: [sshSecurityGroup.name],
 }, { provider });
 
 // Export the instance ID and public IP
