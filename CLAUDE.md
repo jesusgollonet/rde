@@ -99,7 +99,7 @@ pulumi destroy
 - Pulumi state is managed locally by default (can be configured for remote backends)
 - The setup script (`images/setup.sh`) is minimal and can be extended for additional environment configuration
 
-## Current AMI Tools (ami-01d0865ad581c03f1)
+## Current AMI Tools (ami-02c6873dfb5acda91)
 
 ### Priority 1 Tools (Essential & High Usage)
 - **Version Control**: git, gh (GitHub CLI)
