@@ -59,7 +59,7 @@ pulumi destroy
 ## Configuration Details
 
 ### Packer Configuration
-- **Base Image**: Ubuntu 20.04 LTS (eu-west-3 region)
+- **Base Image**: Ubuntu 24.04 LTS (eu-west-3 region)
 - **Instance Type**: t2.micro for building
 - **SSH Key**: Copies public key from `keys/rde.pub` to instance
 
