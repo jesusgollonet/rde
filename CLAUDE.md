@@ -91,3 +91,18 @@ pulumi destroy
 - SSH access is configured during AMI build process
 - Pulumi state is managed locally by default (can be configured for remote backends)
 - The setup script (`images/setup.sh`) is minimal and can be extended for additional environment configuration
+
+## Monitoring Running Instances
+
+To check for accidentally running instances:
+
+```bash
+# Check by project tag
+aws ec2 describe-instances --filters "Name=tag:Project,Values=rde" "Name=instance-state-name,Values=running" --region eu-west-3
+
+# Check all running instances in region
+aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --region eu-west-3 --query 'Reservations[].Instances[].{ID:InstanceId,Name:Tags[?Key==`Name`].Value|[0],State:State.Name,IP:PublicIpAddress}'
+
+# Check current stack status
+cd instances && pulumi stack output
+```
