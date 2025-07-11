@@ -107,7 +107,7 @@ pulumi destroy
 - **Containers**: Docker v28.3.2 + docker-compose
 - **Productivity**: z (directory jumping), fzf (fuzzy finder), httpie
 - **Editors**: vim (enhanced config), tmux (terminal multiplexer)
-- **Shell**: zsh with oh-my-zsh, atuin (shell history), claude-code
+- **Shell**: zsh with oh-my-zsh, atuin (shell history), claude (Claude Code CLI)
 - **System**: curl, wget, unzip, tar, htop, tree, jq
 
 ### Priority 2 Tools (Additional Utilities)
@@ -120,11 +120,15 @@ pulumi destroy
 - **Aliases**: `bat` → `batcat`, `ls` → `eza`, `ll` → `eza -la`
 - **PATH**: Includes ~/.pulumi/bin, ~/.bun/bin, ~/.local/bin, ~/.fzf/bin
 
-### Note on PATH Tools
-Some tools require interactive shell or manual PATH setup in SSH sessions:
+### Tool Usage Notes
+**✅ Available in PATH**: git, gh, node, npm, pnpm, python3, docker, aws, claude, vim, tmux, curl, jq, httpie, eza, rg, batcat
+
+**Require PATH setup in non-interactive SSH**:
 - `pulumi`: use `~/.pulumi/bin/pulumi` or source shell profile
 - `bun`: use `~/.bun/bin/bun` or source shell profile  
 - `fzf`: use `~/.fzf/bin/fzf` or source shell profile
+
+**Require sourcing**:
 - `z`: use `source /usr/local/bin/z.sh` or interactive shell
 
 ## Monitoring Running Instances

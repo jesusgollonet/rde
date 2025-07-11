@@ -71,6 +71,9 @@ echo 'source /usr/local/bin/z.sh' >> /home/ubuntu/.bashrc
 git clone --depth 1 https://github.com/junegunn/fzf.git /home/ubuntu/.fzf
 chown -R ubuntu:ubuntu /home/ubuntu/.fzf
 sudo -u ubuntu /home/ubuntu/.fzf/install --all
+# Add fzf to PATH
+echo 'export PATH="$HOME/.fzf/bin:$PATH"' >> /home/ubuntu/.bashrc
+echo 'export PATH="$HOME/.fzf/bin:$PATH"' >> /home/ubuntu/.zshrc
 
 # Install HTTPie
 sudo apt-get install -y httpie
@@ -106,9 +109,9 @@ sudo chsh -s $(which zsh) ubuntu
 echo "Installing atuin..."
 curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sudo -u ubuntu sh
 
-# Install claude-code (if available)
-echo "Installing claude-code..."
-sudo -u ubuntu sh -c "curl -fsSL https://claude.ai/install.sh | sh" || echo "claude-code installation skipped (not available)"
+# Install claude (Claude Code CLI)
+echo "Installing claude..."
+sudo npm install -g @anthropic-ai/claude-code
 
 # Install Priority 2 development utilities
 echo "Installing additional development utilities..."
@@ -161,7 +164,7 @@ sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 sudo chown -R ubuntu:ubuntu /home/ubuntu
 
 echo "=== RDE AMI Setup Complete ==="
-echo "Priority 1 tools: git, gh, node/pnpm, bun, python/pipx, docker, z, fzf, httpie, vim, tmux, zsh, atuin, claude-code"
+echo "Priority 1 tools: git, gh, node/pnpm, bun, python/pipx, docker, z, fzf, httpie, vim, tmux, zsh, atuin, claude"
 echo "Priority 2 tools: aws-cli, mkcert, ripgrep, bat, eza, pulumi"
 echo "Shell: zsh with oh-my-zsh configured as default"
 echo "Ready for development work!"
