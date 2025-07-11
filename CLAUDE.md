@@ -37,18 +37,22 @@ This script:
 Creates SSH key pair in the `keys/` directory for instance access.
 
 ### Infrastructure Management
-The project uses Terraform Cloud for state management. Terraform commands should be run from the `instances/` directory:
+The project uses Pulumi for infrastructure management. Pulumi commands should be run from the `instances/` directory:
 ```bash
 cd instances/
-terraform plan
-terraform apply
-terraform destroy
+pulumi config set region eu-west-3
+pulumi config set ami ami-xxxxxxxxx
+pulumi preview
+pulumi up
+pulumi destroy
 ```
 
 ## Dependencies
 
 - Packer >=1.7.10
-- Terraform >=1.1.7  
+- Pulumi >=3.0.0
+- Node.js >=18.0.0
+- pnpm >=8.0.0
 - aws-cli >=2.4.7
 - jq >=1.6
 
@@ -59,29 +63,31 @@ terraform destroy
 - **Instance Type**: t2.micro for building
 - **SSH Key**: Copies public key from `keys/rde.pub` to instance
 
-### Terraform Configuration
-- **Backend**: Terraform Cloud (organization: "jgb", workspace: "rde")
-- **Provider**: AWS ~> 3.26.0
+### Pulumi Configuration
+- **Runtime**: Node.js with TypeScript
+- **Package Manager**: pnpm
+- **Provider**: AWS (latest version)
 - **Instance Type**: t3.micro
-- **Required Variables**: `region`, `ami`
+- **Required Config**: `region`, `ami`
 
 ## File Structure
 
 - `bin/`: Executable scripts for common operations
 - `images/`: Packer configuration and setup scripts
-- `instances/`: Terraform infrastructure definitions
+- `instances/`: Pulumi infrastructure definitions
 - `keys/`: SSH keys directory (contents ignored by git)
 
 ## Development Workflow
 
 1. Generate SSH keys if not present: `./bin/generate-key`
 2. Build AMI: `./bin/build-image`
-3. Deploy instance using Terraform from `instances/` directory
-4. AMI rebuilds will automatically replace existing "rde-ami" image
+3. Configure Pulumi: Set region and AMI ID in `instances/` directory
+4. Deploy instance using Pulumi from `instances/` directory
+5. AMI rebuilds will automatically replace existing "rde-ami" image
 
 ## Important Notes
 
 - The AMI name "rde-ami" is hardcoded and automatically replaced on rebuild
 - SSH access is configured during AMI build process
-- Terraform state is managed remotely via Terraform Cloud
+- Pulumi state is managed locally by default (can be configured for remote backends)
 - The setup script (`images/setup.sh`) is minimal and can be extended for additional environment configuration
