@@ -106,7 +106,7 @@ pulumi destroy
 - **Development Runtimes**: Node.js v22.17.0, npm, pnpm, bun, Python 3.12.3, pipx
 - **Containers**: Docker v28.3.2 + docker-compose
 - **Productivity**: z (directory jumping), fzf (fuzzy finder), httpie
-- **Editors**: vim (enhanced config), tmux (terminal multiplexer)
+- **Editors**: vim (enhanced config), tmux (terminal multiplexer), mosh (mobile shell)
 - **Shell**: zsh with oh-my-zsh, atuin (shell history), claude (Claude Code CLI)
 - **System**: curl, wget, unzip, tar, htop, tree, jq
 
@@ -121,7 +121,7 @@ pulumi destroy
 - **PATH**: Includes ~/.pulumi/bin, ~/.bun/bin, ~/.local/bin, ~/.fzf/bin
 
 ### Tool Usage Notes
-**✅ Available in PATH**: git, gh, node, npm, pnpm, python3, docker, aws, claude, vim, tmux, curl, jq, httpie, eza, rg, batcat
+**✅ Available in PATH**: git, gh, node, npm, pnpm, python3, docker, aws, claude, vim, tmux, mosh, curl, jq, httpie, eza, rg, batcat
 
 **Require PATH setup in non-interactive SSH**:
 - `pulumi`: use `~/.pulumi/bin/pulumi` or source shell profile
@@ -130,6 +130,10 @@ pulumi destroy
 
 **Require sourcing**:
 - `z`: use `source /usr/local/bin/z.sh` or interactive shell
+
+**Connection Options**:
+- **SSH**: `ssh -i keys/rde ubuntu@<ip>` (port 22)
+- **Mosh**: `mosh --ssh="ssh -i keys/rde" ubuntu@<ip>` (UDP ports 60000-61000)
 
 ## Monitoring Running Instances
 

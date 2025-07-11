@@ -95,9 +95,9 @@ set background=dark
 EOF
 chown ubuntu:ubuntu /home/ubuntu/.vimrc
 
-# Install tmux
-echo "Installing tmux..."
-sudo apt-get install -y tmux
+# Install tmux and mosh
+echo "Installing tmux and mosh..."
+sudo apt-get install -y tmux mosh
 
 # Install zsh and oh-my-zsh
 echo "Installing zsh and oh-my-zsh..."
@@ -164,7 +164,7 @@ sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 sudo chown -R ubuntu:ubuntu /home/ubuntu
 
 echo "=== RDE AMI Setup Complete ==="
-echo "Priority 1 tools: git, gh, node/pnpm, bun, python/pipx, docker, z, fzf, httpie, vim, tmux, zsh, atuin, claude"
+echo "Priority 1 tools: git, gh, node/pnpm, bun, python/pipx, docker, z, fzf, httpie, vim, tmux, mosh, zsh, atuin, claude"
 echo "Priority 2 tools: aws-cli, mkcert, ripgrep, bat, eza, pulumi"
 echo "Shell: zsh with oh-my-zsh configured as default"
 echo "Ready for development work!"

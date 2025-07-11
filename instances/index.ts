@@ -11,14 +11,20 @@ const provider = new aws.Provider("aws-provider", {
     region: region as aws.Region,
 });
 
-// Create a security group that allows SSH access
+// Create a security group that allows SSH and Mosh access
 const sshSecurityGroup = new aws.ec2.SecurityGroup("rde-ssh", {
-    description: "Allow SSH access",
+    description: "Allow SSH and Mosh access",
     ingress: [
         {
             protocol: "tcp",
             fromPort: 22,
             toPort: 22,
+            cidrBlocks: ["0.0.0.0/0"],
+        },
+        {
+            protocol: "udp",
+            fromPort: 60000,
+            toPort: 61000,
             cidrBlocks: ["0.0.0.0/0"],
         },
     ],
@@ -31,7 +37,7 @@ const sshSecurityGroup = new aws.ec2.SecurityGroup("rde-ssh", {
         },
     ],
     tags: {
-        Name: "rde-ssh-sg",
+        Name: "rde-ssh-mosh-sg",
         Project: "rde",
     },
 }, { provider });
