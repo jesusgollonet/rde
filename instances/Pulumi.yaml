@@ -1,0 +1,10 @@
+name: rde
+description: Remote development environment using Pulumi
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript
