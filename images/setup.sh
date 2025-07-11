@@ -71,9 +71,8 @@ echo 'source /usr/local/bin/z.sh' >> /home/ubuntu/.bashrc
 git clone --depth 1 https://github.com/junegunn/fzf.git /home/ubuntu/.fzf
 chown -R ubuntu:ubuntu /home/ubuntu/.fzf
 sudo -u ubuntu /home/ubuntu/.fzf/install --all
-# Add fzf to PATH
+# Add fzf to PATH for bash
 echo 'export PATH="$HOME/.fzf/bin:$PATH"' >> /home/ubuntu/.bashrc
-echo 'export PATH="$HOME/.fzf/bin:$PATH"' >> /home/ubuntu/.zshrc
 
 # Install HTTPie
 sudo apt-get install -y httpie
@@ -99,11 +98,47 @@ chown ubuntu:ubuntu /home/ubuntu/.vimrc
 echo "Installing tmux and mosh..."
 sudo apt-get install -y tmux mosh
 
-# Install zsh and oh-my-zsh
-echo "Installing zsh and oh-my-zsh..."
+# Install zsh (without oh-my-zsh)
+echo "Installing zsh..."
 sudo apt-get install -y zsh
-sudo -u ubuntu sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 sudo chsh -s $(which zsh) ubuntu
+
+# Configure basic zsh
+cat > /home/ubuntu/.zshrc << 'EOF'
+# Basic zsh configuration
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory autocd extendedglob nomatch notify
+bindkey -e
+
+# Basic prompt
+autoload -U colors && colors
+PS1="%{$fg[green]%}%n@%m%{$reset_color%}:%{$fg[blue]%}%~%{$reset_color%}$ "
+
+# Load z for directory jumping
+source /usr/local/bin/z.sh
+
+# Load fzf key bindings and completion
+source ~/.fzf/shell/key-bindings.zsh
+source ~/.fzf/shell/completion.zsh
+
+# Path additions
+export PATH="$HOME/.bun/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.pulumi/bin:$PATH"
+export PATH="$HOME/.fzf/bin:$PATH"
+
+# Aliases
+alias bat=batcat
+alias ls="eza"
+alias ll="eza -la"
+
+# Atuin
+. "$HOME/.atuin/bin/env"
+eval "$(atuin init zsh)"
+EOF
+chown ubuntu:ubuntu /home/ubuntu/.zshrc
 
 # Install atuin (shell history)
 echo "Installing atuin..."
@@ -138,21 +173,17 @@ echo "Installing bat..."
 sudo apt-get install -y bat
 # Create batcat alias as bat (Ubuntu uses batcat to avoid conflict)
 echo 'alias bat=batcat' >> /home/ubuntu/.bashrc
-echo 'alias bat=batcat' >> /home/ubuntu/.zshrc
 
 # Install eza (modern ls replacement, successor to exa)
 echo "Installing eza..."
 sudo apt-get install -y eza
 echo 'alias ls="eza"' >> /home/ubuntu/.bashrc
-echo 'alias ls="eza"' >> /home/ubuntu/.zshrc
 echo 'alias ll="eza -la"' >> /home/ubuntu/.bashrc
-echo 'alias ll="eza -la"' >> /home/ubuntu/.zshrc
 
 # Install Pulumi
 echo "Installing Pulumi..."
 curl -fsSL https://get.pulumi.com | sh
 echo 'export PATH="$HOME/.pulumi/bin:$PATH"' >> /home/ubuntu/.bashrc
-echo 'export PATH="$HOME/.pulumi/bin:$PATH"' >> /home/ubuntu/.zshrc
 
 # Setup SSH keys
 echo "Setting up SSH keys..."
@@ -166,5 +197,5 @@ sudo chown -R ubuntu:ubuntu /home/ubuntu
 echo "=== RDE AMI Setup Complete ==="
 echo "Priority 1 tools: git, gh, node/pnpm, bun, python/pipx, docker, z, fzf, httpie, vim, tmux, mosh, zsh, atuin, claude"
 echo "Priority 2 tools: aws-cli, mkcert, ripgrep, bat, eza, pulumi"
-echo "Shell: zsh with oh-my-zsh configured as default"
+echo "Shell: zsh with custom configuration as default"
 echo "Ready for development work!"
