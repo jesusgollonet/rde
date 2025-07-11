@@ -68,6 +68,7 @@ pulumi destroy
 - **Base Image**: Ubuntu 24.04 LTS (eu-west-3 region)
 - **Instance Type**: t2.micro for building
 - **SSH Key**: Copies public key from `keys/rde.pub` to instance
+- **Development Tools**: Comprehensive toolchain installed (see Current AMI Tools below)
 
 ### Pulumi Configuration
 - **Runtime**: Node.js with TypeScript
@@ -97,6 +98,34 @@ pulumi destroy
 - SSH access is configured during AMI build process
 - Pulumi state is managed locally by default (can be configured for remote backends)
 - The setup script (`images/setup.sh`) is minimal and can be extended for additional environment configuration
+
+## Current AMI Tools (ami-01d0865ad581c03f1)
+
+### Priority 1 Tools (Essential & High Usage)
+- **Version Control**: git, gh (GitHub CLI)
+- **Development Runtimes**: Node.js v22.17.0, npm, pnpm, bun, Python 3.12.3, pipx
+- **Containers**: Docker v28.3.2 + docker-compose
+- **Productivity**: z (directory jumping), fzf (fuzzy finder), httpie
+- **Editors**: vim (enhanced config), tmux (terminal multiplexer)
+- **Shell**: zsh with oh-my-zsh, atuin (shell history), claude-code
+- **System**: curl, wget, unzip, tar, htop, tree, jq
+
+### Priority 2 Tools (Additional Utilities)
+- **Cloud**: aws-cli v2.27.50, pulumi v3.181.0
+- **Security**: mkcert (local SSL certificates)
+- **Modern CLI**: ripgrep (rg), bat/batcat, eza (modern ls)
+
+### Shell Configuration
+- **Default Shell**: zsh with oh-my-zsh
+- **Aliases**: `bat` → `batcat`, `ls` → `eza`, `ll` → `eza -la`
+- **PATH**: Includes ~/.pulumi/bin, ~/.bun/bin, ~/.local/bin, ~/.fzf/bin
+
+### Note on PATH Tools
+Some tools require interactive shell or manual PATH setup in SSH sessions:
+- `pulumi`: use `~/.pulumi/bin/pulumi` or source shell profile
+- `bun`: use `~/.bun/bin/bun` or source shell profile  
+- `fzf`: use `~/.fzf/bin/fzf` or source shell profile
+- `z`: use `source /usr/local/bin/z.sh` or interactive shell
 
 ## Monitoring Running Instances
 
