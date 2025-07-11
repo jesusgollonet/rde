@@ -1,0 +1,4 @@
+config:
+  aws:region: us-east-1
+  rde:region: eu-west-3
+  rde:ami: ami-0bad85ed375da6130

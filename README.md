@@ -19,7 +19,7 @@ of nice side effects:
 There are 2 main parts to this:
 - Create an image: build an AMI with all the dependencies and
   configuration baked in.
-- Spin up an instance: use terraform to turn the computer on and off.
+- Spin up an instance: use pulumi to turn the computer on and off.
 
 The current iteration is based on AWS but the implementation is portable to other
 cloud vendors.
@@ -27,7 +27,7 @@ cloud vendors.
 ### Directory structure
 - `bin`: top level scripts   
 - `images`: packer and shell scripts to bake the AMI
-- `instances`: terraform script to spin up instance 
+- `instances`: pulumi script to spin up instance 
 - `keys`: ssh keys. keys are ignored but keeping a directory to have a
   predictable location. 
 
@@ -37,19 +37,25 @@ cloud vendors.
 ./bin/build-image
 ```
 
-### Spin up instance (TODO)
+### Spin up instance
 ```bash
-./bin/spin-up
+cd instances
+pulumi config set region eu-west-3
+pulumi config set ami ami-xxxxxxxxx
+pulumi up
 ```
 
-### Destroy instance (TODO)
+### Destroy instance
 ```bash
-./bin/spin-down
+cd instances
+pulumi destroy
 ```
 
 ## Dependencies
 - Packer >=1.7.10
-- Terraform >=1.1.7
+- Pulumi >=3.0.0
+- Node.js >=18.0.0
+- pnpm >=8.0.0
 - aws-cli >=2.4.7
 - jq >=1.6
 
