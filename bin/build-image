@@ -14,8 +14,14 @@ main(){
 # We need to delete any existing ami with that name
 delete_existing_ami(){
     local ami_name=rde-ami
-    local ami_id=$(aws ec2 describe-images --filters Name=name,Values="$ami_name" | jq -r ".Images[0].ImageId")
-    aws ec2 deregister-image --image-id "$ami_id"
+    local region=eu-west-3
+    local ami_id=$(aws ec2 describe-images --filters Name=name,Values="$ami_name" --region "$region" | jq -r ".Images[0].ImageId")
+    if [ "$ami_id" != "null" ] && [ -n "$ami_id" ]; then
+        echo "Deleting existing AMI: $ami_id"
+        aws ec2 deregister-image --image-id "$ami_id" --region "$region"
+    else
+        echo "No existing AMI named '$ami_name' found"
+    fi
 }
 
 main
