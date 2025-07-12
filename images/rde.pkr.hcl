@@ -35,5 +35,16 @@ build {
   provisioner "shell" {
     script = "./images/setup.sh"
   }
+  provisioner "file" {
+    source      = "bin/test-tools"
+    destination = "/tmp/test-tools"
+  }
+  provisioner "shell" {
+    inline = [
+      "chmod +x /tmp/test-tools",
+      "sudo /tmp/test-tools",
+      "rm /tmp/test-tools"
+    ]
+  }
 }
 

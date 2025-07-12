@@ -1,0 +1,190 @@
+#!/bin/bash
+
+set -e
+
+echo "=== RDE Tools Test Script ==="
+echo "Testing all installed development tools..."
+echo
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Counters
+TOTAL_TESTS=0
+PASSED_TESTS=0
+FAILED_TESTS=0
+
+# Test result function
+test_tool() {
+    local tool_name="$1"
+    local test_command="$2"
+    local expected_pattern="$3"
+    
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
+    echo -n "Testing $tool_name... "
+    
+    if eval "$test_command" >/dev/null 2>&1; then
+        if [ -n "$expected_pattern" ]; then
+            local output=$(eval "$test_command" 2>&1)
+            if echo "$output" | grep -q "$expected_pattern"; then
+                echo -e "${GREEN}✅ PASS${NC}"
+                PASSED_TESTS=$((PASSED_TESTS + 1))
+            else
+                echo -e "${RED}❌ FAIL${NC} (unexpected output)"
+                FAILED_TESTS=$((FAILED_TESTS + 1))
+            fi
+        else
+            echo -e "${GREEN}✅ PASS${NC}"
+            PASSED_TESTS=$((PASSED_TESTS + 1))
+        fi
+    else
+        echo -e "${RED}❌ FAIL${NC}"
+        FAILED_TESTS=$((FAILED_TESTS + 1))
+    fi
+}
+
+# Test executable exists
+test_executable() {
+    local tool_name="$1"
+    local executable="$2"
+    
+    test_tool "$tool_name (executable)" "which $executable"
+}
+
+# Test version command
+test_version() {
+    local tool_name="$1"
+    local version_command="$2"
+    local version_pattern="$3"
+    
+    test_tool "$tool_name (version)" "$version_command" "$version_pattern"
+}
+
+echo "=== Priority 1 Tools ==="
+
+# Git
+test_executable "git" "git"
+test_version "git" "git --version" "git version"
+
+# GitHub CLI
+test_executable "gh" "gh"
+test_version "gh" "gh --version" "gh version"
+
+# Node.js and package managers
+test_executable "node" "node"
+test_version "node" "node --version" "v"
+test_executable "npm" "npm"
+test_executable "pnpm" "pnpm"
+test_version "pnpm" "pnpm --version" "[0-9]"
+
+# Bun
+test_executable "bun" "bun"
+test_version "bun" "bun --version" "[0-9]"
+
+# Python and pipx
+test_executable "python3" "python3"
+test_version "python3" "python3 --version" "Python 3"
+test_executable "pipx" "pipx"
+
+# Docker
+test_executable "docker" "docker"
+test_version "docker" "docker --version" "Docker version"
+
+# Productivity tools
+test_tool "z.sh (file exists)" "test -f /usr/local/bin/z.sh"
+test_executable "fzf" "fzf"
+
+# HTTPie
+test_executable "httpie" "http"
+test_version "httpie" "http --version" "[0-9]"
+
+# Vim
+test_executable "vim" "vim"
+test_tool "vim config" "test -f /home/ubuntu/.vimrc"
+
+# Tmux and Mosh
+test_executable "tmux" "tmux"
+test_version "tmux" "tmux -V" "tmux"
+test_executable "mosh" "mosh"
+
+# Zsh
+test_executable "zsh" "zsh"
+test_version "zsh" "zsh --version" "zsh"
+test_tool "zsh config" "test -f /home/ubuntu/.zshrc"
+
+# Atuin
+test_tool "atuin (in PATH)" "test -f /home/ubuntu/.atuin/bin/atuin"
+
+# Claude Code CLI
+test_executable "claude" "claude"
+
+echo
+echo "=== Priority 2 Tools ==="
+
+# AWS CLI
+test_executable "aws" "aws"
+test_version "aws" "aws --version" "aws-cli"
+
+# mkcert
+test_executable "mkcert" "mkcert"
+test_version "mkcert" "mkcert -help" "mkcert"
+
+# ripgrep
+test_executable "rg" "rg"
+test_version "rg" "rg --version" "ripgrep"
+
+# bat
+test_executable "batcat" "batcat"
+test_version "batcat" "batcat --version" "bat"
+
+# eza
+test_executable "eza" "eza"
+test_version "eza" "eza --version" "eza"
+
+# Pulumi
+test_tool "pulumi (in PATH)" "test -f /home/ubuntu/.pulumi/bin/pulumi"
+
+echo
+echo "=== Shell Configuration Tests ==="
+
+# Test shell configurations
+test_tool "bash config" "test -f /home/ubuntu/.bashrc"
+test_tool "zsh config" "test -f /home/ubuntu/.zshrc"
+
+# Test key configurations in zsh
+test_tool "z in zshrc" "grep -q 'source /usr/local/bin/z.sh' /home/ubuntu/.zshrc"
+test_tool "fzf in zshrc" "grep -q 'source ~/.fzf/shell/key-bindings.zsh' /home/ubuntu/.zshrc"
+test_tool "atuin in zshrc" "grep -q 'atuin init zsh' /home/ubuntu/.zshrc"
+
+# Test PATH exports
+test_tool "bun PATH in zshrc" "grep -q 'HOME/.bun/bin' /home/ubuntu/.zshrc"
+test_tool "pulumi PATH in zshrc" "grep -q 'HOME/.pulumi/bin' /home/ubuntu/.zshrc"
+
+# Test aliases
+test_tool "eza alias in zshrc" "grep -q 'alias ls=\"eza\"' /home/ubuntu/.zshrc"
+test_tool "bat alias in zshrc" "grep -q 'alias bat=batcat' /home/ubuntu/.zshrc"
+
+echo
+echo "=== Functional Tests ==="
+
+# Test actual functionality where possible
+test_tool "docker service" "systemctl is-active docker"
+test_tool "fzf installation" "test -d /home/ubuntu/.fzf"
+test_tool "SSH keys" "test -f /home/ubuntu/.ssh/authorized_keys"
+
+echo
+echo "=== Test Summary ==="
+echo "Total tests: $TOTAL_TESTS"
+echo -e "Passed: ${GREEN}$PASSED_TESTS${NC}"
+echo -e "Failed: ${RED}$FAILED_TESTS${NC}"
+
+if [ $FAILED_TESTS -eq 0 ]; then
+    echo -e "${GREEN}🎉 All tests passed!${NC}"
+    exit 0
+else
+    echo -e "${RED}⚠️  Some tests failed. Check the output above.${NC}"
+    exit 1
+fi

@@ -42,6 +42,15 @@ Creates SSH key pair in the `keys/` directory for instance access.
 ```
 Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI.
 
+### Test Tools Installation
+```bash
+./bin/test-tools
+```
+Validates that all development tools are properly installed and configured on a running instance. This script tests:
+- All Priority 1 and Priority 2 tools (executable presence and version checks)
+- Shell configurations (bash/zsh config files and integrations)
+- Functional tests (services, permissions, PATH configurations)
+
 ### Infrastructure Management
 The project uses Pulumi for infrastructure management. Pulumi commands should be run from the `instances/` directory:
 ```bash
@@ -87,10 +96,11 @@ pulumi destroy
 ## Development Workflow
 
 1. Generate SSH keys if not present: `./bin/generate-key`
-2. Build AMI: `./bin/build-image`
+2. Build AMI: `./bin/build-image` (includes automated tool validation)
 3. Configure Pulumi: Set region and AMI ID in `instances/` directory
 4. Deploy instance using Pulumi from `instances/` directory
-5. AMI rebuilds will automatically replace existing "rde-ami" image
+5. Test deployed instance: SSH in and run `./bin/test-tools` for verification
+6. AMI rebuilds will automatically replace existing "rde-ami" image
 
 ## Important Notes
 
@@ -107,7 +117,7 @@ pulumi destroy
 - **Containers**: Docker v28.3.2 + docker-compose
 - **Productivity**: z (directory jumping), fzf (fuzzy finder), httpie
 - **Editors**: vim (enhanced config), tmux (terminal multiplexer), mosh (mobile shell)
-- **Shell**: zsh with oh-my-zsh, atuin (shell history), claude (Claude Code CLI)
+- **Shell**: zsh with custom configuration, atuin (shell history), claude (Claude Code CLI)
 - **System**: curl, wget, unzip, tar, htop, tree, jq
 
 ### Priority 2 Tools (Additional Utilities)
@@ -116,9 +126,10 @@ pulumi destroy
 - **Modern CLI**: ripgrep (rg), bat/batcat, eza (modern ls)
 
 ### Shell Configuration
-- **Default Shell**: zsh with oh-my-zsh
+- **Default Shell**: zsh with custom configuration (no oh-my-zsh)
 - **Aliases**: `bat` → `batcat`, `ls` → `eza`, `ll` → `eza -la`
 - **PATH**: Includes ~/.pulumi/bin, ~/.bun/bin, ~/.local/bin, ~/.fzf/bin
+- **Integrations**: z (directory jumping), fzf (fuzzy finder), atuin (shell history)
 
 ### Tool Usage Notes
 **✅ Available in PATH**: git, gh, node, npm, pnpm, python3, docker, aws, claude, vim, tmux, mosh, curl, jq, httpie, eza, rg, batcat
