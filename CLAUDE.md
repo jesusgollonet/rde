@@ -60,7 +60,7 @@ The project uses Pulumi for infrastructure management. Pulumi commands should be
 ```bash
 cd instances/
 pulumi config set region eu-west-3
-pulumi config set ami ami-xxxxxxxxx
+# AMI is automatically detected - no manual configuration needed
 pulumi preview
 pulumi up
 pulumi destroy
@@ -88,7 +88,7 @@ pulumi destroy
 - **Package Manager**: pnpm
 - **Provider**: AWS (latest version)
 - **Instance Type**: t3.micro
-- **Required Config**: `region`, `ami`
+- **Required Config**: `region` (AMI auto-detected)
 
 ## File Structure
 
@@ -101,10 +101,10 @@ pulumi destroy
 
 1. Generate SSH keys if not present: `./bin/generate-key`
 2. Build AMI: `./bin/build-image` (includes automated tool validation)
-3. Configure Pulumi: Set region and AMI ID in `instances/` directory
+3. Configure Pulumi: Set region in `instances/` directory (AMI auto-detected)
 4. Deploy instance using Pulumi from `instances/` directory
 5. Test deployed instance: `./bin/test-remote <instance-ip>` for verification
-6. AMI rebuilds will automatically replace existing "rde-ami" image
+6. AMI rebuilds automatically update - Pulumi always uses latest "rde-ami"
 
 ## Important Notes
 
