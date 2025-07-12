@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e
+
+echo "=== RDE SSH Connect ==="
+
+# Function to get current instance IP
+get_rde_ip() {
+    if [ -d "instances" ]; then
+        cd instances
+        pulumi stack output publicIp 2>/dev/null || echo ""
+        cd ..
+    else
+        echo ""
+    fi
+}
+
+# Check if we're in the RDE project directory
+if [ ! -f "CLAUDE.md" ] || [ ! -d "bin" ]; then
+    echo "❌ Please run this script from the RDE project root directory"
+    exit 1
+fi
+
+# Check if SSH key exists
+if [ ! -f "keys/rde" ]; then
+    echo "❌ SSH key not found: keys/rde"
+    echo "Generate it with: ./bin/generate-key"
+    exit 1
+fi
+
+# Get the current instance IP
+INSTANCE_IP=$(get_rde_ip)
+
+if [ -z "$INSTANCE_IP" ] || [ "$INSTANCE_IP" = "null" ]; then
+    echo "❌ No RDE instance running or Pulumi stack not found"
+    echo "Deploy an instance with:"
+    echo "  cd instances && pulumi up"
+    echo "Or check status with:"
+    echo "  ./bin/is-it-running"
+    exit 1
+fi
+
+echo "Connecting to RDE instance: $INSTANCE_IP"
+echo "Use Ctrl+D or 'exit' to disconnect"
+echo
+
+# Connect to the instance
+ssh -i keys/rde -o StrictHostKeyChecking=no ubuntu@$INSTANCE_IP

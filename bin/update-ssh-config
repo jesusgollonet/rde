@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -e
+
+echo "=== RDE SSH Config Generator ==="
+
+# Check if we're in the RDE project directory
+if [ ! -f "CLAUDE.md" ] || [ ! -d "bin" ]; then
+    echo "❌ Please run this script from the RDE project root directory"
+    exit 1
+fi
+
+# Check if SSH key exists
+if [ ! -f "keys/rde" ]; then
+    echo "❌ SSH key not found: keys/rde"
+    echo "Generate it with: ./bin/generate-key"
+    exit 1
+fi
+
+# Get the current instance IP
+INSTANCE_IP=""
+if [ -d "instances" ]; then
+    cd instances
+    INSTANCE_IP=$(pulumi stack output publicIp 2>/dev/null || echo "")
+    cd ..
+fi
+
+if [ -z "$INSTANCE_IP" ] || [ "$INSTANCE_IP" = "null" ]; then
+    echo "❌ No RDE instance running or Pulumi stack not found"
+    echo "Deploy an instance with:"
+    echo "  cd instances && pulumi up"
+    echo "Or check status with:"
+    echo "  ./bin/is-it-running"
+    exit 1
+fi
+
+# Create .ssh directory if it doesn't exist
+mkdir -p .ssh
+
+# Generate the SSH config
+cat > .ssh/config << EOF
+# RDE Instance SSH Configuration
+# Generated automatically by bin/update-ssh-config
+# Last updated: $(date)
+
+Host rde
+    HostName $INSTANCE_IP
+    User ubuntu
+    IdentityFile keys/rde
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    LogLevel QUIET
+EOF
+
+echo "✅ SSH config generated successfully!"
+echo "Instance IP: $INSTANCE_IP"
+echo
+echo "Usage:"
+echo "  ssh -F .ssh/config rde"
+echo
+echo "Or create an alias in your shell:"
+echo "  alias rde-ssh='ssh -F $(pwd)/.ssh/config rde'"
+echo
+echo "Note: Run this script again if the instance IP changes."

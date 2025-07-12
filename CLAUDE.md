@@ -42,6 +42,20 @@ Creates SSH key pair in the `keys/` directory for instance access.
 ```
 Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI.
 
+### Connect to Instance
+```bash
+# Easy SSH connection (auto-detects IP)
+./bin/ssh-connect
+
+# Shell function (add to ~/.bashrc or ~/.zshrc)
+source bin/shell-function
+rde    # Short alias for SSH connection
+
+# Local SSH config method
+./bin/update-ssh-config
+ssh -F .ssh/config rde
+```
+
 ### Set Up GitHub Authentication
 ```bash
 # On the remote instance, run the setup helper
@@ -73,7 +87,7 @@ The project uses Pulumi for infrastructure management. Pulumi commands should be
 ```bash
 cd instances/
 pulumi config set region eu-west-3
-pulumi config set ami ami-xxxxxxxxx
+# AMI is automatically detected - no manual configuration needed
 pulumi preview
 pulumi up
 pulumi destroy
@@ -101,7 +115,7 @@ pulumi destroy
 - **Package Manager**: pnpm
 - **Provider**: AWS (latest version)
 - **Instance Type**: t3.micro
-- **Required Config**: `region`, `ami`
+- **Required Config**: `region` (AMI auto-detected)
 
 ## File Structure
 
@@ -114,10 +128,10 @@ pulumi destroy
 
 1. Generate SSH keys if not present: `./bin/generate-key`
 2. Build AMI: `./bin/build-image` (includes automated tool validation)
-3. Configure Pulumi: Set region and AMI ID in `instances/` directory
+3. Configure Pulumi: Set region in `instances/` directory (AMI auto-detected)
 4. Deploy instance using Pulumi from `instances/` directory
 5. Test deployed instance: `./bin/test-remote <instance-ip>` for verification
-6. AMI rebuilds will automatically replace existing "rde-ami" image
+6. AMI rebuilds automatically update - Pulumi always uses latest "rde-ami"
 
 ## Important Notes
 
@@ -160,7 +174,9 @@ pulumi destroy
 - `z`: use `source /usr/local/bin/z.sh` or interactive shell
 
 **Connection Options**:
-- **SSH**: `ssh -i keys/rde ubuntu@<ip>` (port 22)
+- **Easy SSH**: `./bin/ssh-connect` (auto-detects IP)
+- **Shell Alias**: `rde` (after sourcing bin/shell-function)  
+- **Manual SSH**: `ssh -i keys/rde ubuntu@<ip>` (port 22)
 - **Mosh**: `mosh --ssh="ssh -i keys/rde" ubuntu@<ip>` (UDP ports 60000-61000)
 
 ## Monitoring Running Instances
