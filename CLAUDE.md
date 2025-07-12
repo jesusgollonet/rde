@@ -42,6 +42,19 @@ Creates SSH key pair in the `keys/` directory for instance access.
 ```
 Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI.
 
+### Set Up GitHub Authentication
+```bash
+# On the remote instance, run the setup helper
+~/setup-github.sh
+
+# Or use the comprehensive local setup script
+./bin/setup-github
+```
+The AMI includes GitHub preparation with SSH configuration. On first login, run the setup script to:
+- Configure Git with your name and email
+- Generate SSH key for GitHub authentication  
+- Get instructions for adding the key to GitHub
+
 ### Test Tools Installation
 ```bash
 # Test tools on a remote instance

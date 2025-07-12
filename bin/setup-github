@@ -1,0 +1,179 @@
+#!/bin/bash
+
+set -e
+
+echo "=== RDE GitHub Setup ==="
+echo "This script sets up GitHub CLI authentication and Git SSH keys"
+echo
+
+# Function to check if we're on a remote instance
+is_remote_instance() {
+    [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ] || [ "$USER" = "ubuntu" ]
+}
+
+# Function to generate SSH key for GitHub
+generate_github_ssh_key() {
+    local email="$1"
+    
+    if [ -f ~/.ssh/id_ed25519 ]; then
+        echo "SSH key already exists at ~/.ssh/id_ed25519"
+        read -p "Do you want to overwrite it? (y/N): " overwrite
+        if [ "$overwrite" != "y" ] && [ "$overwrite" != "Y" ]; then
+            echo "Keeping existing SSH key"
+            return 0
+        fi
+    fi
+    
+    echo "Generating new SSH key for GitHub..."
+    ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/id_ed25519 -N ""
+    
+    # Start ssh-agent and add key
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/id_ed25519
+    
+    echo "✅ SSH key generated and added to ssh-agent"
+}
+
+# Function to configure Git
+configure_git() {
+    local name="$1"
+    local email="$2"
+    
+    echo "Configuring Git with your details..."
+    git config --global user.name "$name"
+    git config --global user.email "$email"
+    
+    # Set up SSH for GitHub
+    git config --global url."git@github.com:".insteadOf "https://github.com/"
+    
+    echo "✅ Git configured with name: $name, email: $email"
+}
+
+# Function to set up GitHub CLI
+setup_github_cli() {
+    echo "Setting up GitHub CLI authentication..."
+    
+    if gh auth status >/dev/null 2>&1; then
+        echo "GitHub CLI is already authenticated"
+        gh auth status
+        return 0
+    fi
+    
+    echo "Starting GitHub CLI authentication process..."
+    echo "You'll be prompted to authenticate via web browser or token"
+    
+    # Start interactive auth
+    gh auth login
+    
+    echo "✅ GitHub CLI authentication complete"
+}
+
+# Function to test GitHub access
+test_github_access() {
+    echo "Testing GitHub access..."
+    
+    # Test SSH connection
+    echo "Testing SSH connection to GitHub..."
+    if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+        echo "✅ SSH connection to GitHub working"
+    else
+        echo "⚠️  SSH connection test inconclusive (this may be normal)"
+    fi
+    
+    # Test GitHub CLI
+    echo "Testing GitHub CLI access..."
+    if gh auth status >/dev/null 2>&1; then
+        echo "✅ GitHub CLI authentication working"
+        gh api user --jq '.login' | xargs -I {} echo "Authenticated as: {}"
+    else
+        echo "❌ GitHub CLI authentication failed"
+        return 1
+    fi
+    
+    # Test cloning a public repo
+    echo "Testing repository cloning..."
+    local test_dir="/tmp/gh-test-$(date +%s)"
+    if gh repo clone octocat/Hello-World "$test_dir" >/dev/null 2>&1; then
+        echo "✅ Repository cloning working"
+        rm -rf "$test_dir"
+    else
+        echo "❌ Repository cloning failed"
+        return 1
+    fi
+}
+
+# Main setup function
+main() {
+    echo "This script will help you set up GitHub authentication for development work."
+    echo
+    
+    # Get user information
+    read -p "Enter your full name for Git: " git_name
+    read -p "Enter your email address for Git: " git_email
+    
+    if [ -z "$git_name" ] || [ -z "$git_email" ]; then
+        echo "❌ Name and email are required"
+        exit 1
+    fi
+    
+    echo
+    echo "Setting up GitHub authentication with:"
+    echo "  Name: $git_name"
+    echo "  Email: $git_email"
+    echo
+    
+    # Generate SSH key
+    generate_github_ssh_key "$git_email"
+    
+    # Configure Git
+    configure_git "$git_name" "$git_email"
+    
+    # Set up GitHub CLI
+    setup_github_cli
+    
+    echo
+    echo "📋 Your SSH public key (add this to GitHub):"
+    echo "https://github.com/settings/ssh/new"
+    echo
+    cat ~/.ssh/id_ed25519.pub
+    echo
+    
+    if is_remote_instance; then
+        echo "⚠️  Copy the SSH key above and add it to your GitHub account"
+        echo "Then press any key to continue testing..."
+        read -n 1
+    fi
+    
+    # Test everything
+    echo
+    test_github_access
+    
+    echo
+    echo "🎉 GitHub setup complete!"
+    echo
+    echo "You can now:"
+    echo "  - Clone repositories: gh repo clone owner/repo"
+    echo "  - Use Git with SSH: git clone git@github.com:owner/repo.git"
+    echo "  - Create issues, PRs, etc. with gh CLI"
+}
+
+# Check if running with arguments (for automation)
+if [ $# -eq 2 ]; then
+    git_name="$1"
+    git_email="$2"
+    
+    echo "Running automated setup with provided credentials..."
+    generate_github_ssh_key "$git_email"
+    configure_git "$git_name" "$git_email"
+    
+    echo
+    echo "📋 SSH public key (add to GitHub):"
+    cat ~/.ssh/id_ed25519.pub
+    echo
+    echo "⚠️  Manual steps required:"
+    echo "1. Add the SSH key above to GitHub: https://github.com/settings/ssh/new"
+    echo "2. Run 'gh auth login' to authenticate GitHub CLI"
+    echo "3. Run this script again without arguments to test"
+else
+    main
+fi

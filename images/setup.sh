@@ -191,6 +191,11 @@ sudo cp /tmp/rde.pub /home/ubuntu/.ssh/authorized_keys
 sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 
+# Run GitHub preparation
+echo "Preparing GitHub authentication..."
+chmod +x /tmp/github-prep.sh
+/tmp/github-prep.sh
+
 # Set proper ownership for home directory
 sudo chown -R ubuntu:ubuntu /home/ubuntu
 

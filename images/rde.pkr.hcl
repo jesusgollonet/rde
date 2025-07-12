@@ -32,6 +32,10 @@ build {
     source      = "keys/rde.pub"
     destination = "/tmp/rde.pub"
   }
+  provisioner "file" {
+    source      = "images/github-prep.sh"
+    destination = "/tmp/github-prep.sh"
+  }
   provisioner "shell" {
     script = "./images/setup.sh"
   }
