@@ -27,9 +27,8 @@ if [ ! -f "$SSH_KEY" ]; then
 fi
 
 echo "Testing tools on instance: $INSTANCE_IP"
-echo "Copying and running test script..."
+echo "Streaming and running test script..."
 echo
 
-# Copy test script to instance and run it
-scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "bin/test-tools" "ubuntu@$INSTANCE_IP:/tmp/test-tools"
-ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ubuntu@$INSTANCE_IP" "chmod +x /tmp/test-tools && /tmp/test-tools && rm /tmp/test-tools"
+# Stream test script to remote instance and run it
+ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ubuntu@$INSTANCE_IP" 'bash -s' < "bin/test-tools"

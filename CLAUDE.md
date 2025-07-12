@@ -47,9 +47,8 @@ Checks if any RDE instances are currently running using both Pulumi stack status
 # Test tools on a remote instance
 ./bin/test-remote <instance-ip>
 
-# Or manually copy and run
-scp -i keys/rde bin/test-tools ubuntu@<ip>:/tmp/
-ssh -i keys/rde ubuntu@<ip> "chmod +x /tmp/test-tools && /tmp/test-tools"
+# Or stream script directly via SSH
+ssh -i keys/rde ubuntu@<ip> 'bash -s' < bin/test-tools
 ```
 Validates that all development tools are properly installed and configured on a running instance. This script tests:
 - All Priority 1 and Priority 2 tools (executable presence and version checks)
