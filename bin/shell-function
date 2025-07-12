@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# RDE SSH Shell Function
+# Add this to your ~/.bashrc or ~/.zshrc for easy SSH access
+
+rde_ssh() {
+    local rde_dir="$HOME/Work/own/rde"
+    
+    # Check if RDE directory exists
+    if [ ! -d "$rde_dir" ]; then
+        echo "❌ RDE project not found at: $rde_dir"
+        echo "Update the rde_dir variable in this function to match your RDE location"
+        return 1
+    fi
+    
+    # Change to RDE directory temporarily
+    local current_dir=$(pwd)
+    cd "$rde_dir"
+    
+    # Check if SSH key exists
+    if [ ! -f "keys/rde" ]; then
+        echo "❌ SSH key not found: keys/rde"
+        echo "Generate it with: ./bin/generate-key"
+        cd "$current_dir"
+        return 1
+    fi
+    
+    # Get the current instance IP
+    local instance_ip=""
+    if [ -d "instances" ]; then
+        cd instances
+        instance_ip=$(pulumi stack output publicIp 2>/dev/null || echo "")
+        cd ..
+    fi
+    
+    if [ -z "$instance_ip" ] || [ "$instance_ip" = "null" ]; then
+        echo "❌ No RDE instance running or Pulumi stack not found"
+        echo "Deploy an instance with:"
+        echo "  cd $rde_dir/instances && pulumi up"
+        echo "Or check status with:"
+        echo "  $rde_dir/bin/is-it-running"
+        cd "$current_dir"
+        return 1
+    fi
+    
+    echo "Connecting to RDE instance: $instance_ip"
+    echo "Use Ctrl+D or 'exit' to disconnect"
+    echo
+    
+    # Connect to the instance
+    ssh -i keys/rde -o StrictHostKeyChecking=no ubuntu@$instance_ip
+    
+    # Return to original directory
+    cd "$current_dir"
+}
+
+# Create an alias for shorter access
+alias rde='rde_ssh'
+
+echo "RDE SSH function loaded!"
+echo "Usage:"
+echo "  rde_ssh    # Full function name"
+echo "  rde        # Short alias"
+echo ""
+echo "To add permanently, add these lines to your ~/.bashrc or ~/.zshrc:"
+echo "  source $HOME/Work/own/rde/bin/shell-function"

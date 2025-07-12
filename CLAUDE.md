@@ -42,6 +42,20 @@ Creates SSH key pair in the `keys/` directory for instance access.
 ```
 Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI.
 
+### Connect to Instance
+```bash
+# Easy SSH connection (auto-detects IP)
+./bin/ssh-connect
+
+# Shell function (add to ~/.bashrc or ~/.zshrc)
+source bin/shell-function
+rde    # Short alias for SSH connection
+
+# Local SSH config method
+./bin/update-ssh-config
+ssh -F .ssh/config rde
+```
+
 ### Test Tools Installation
 ```bash
 # Test tools on a remote instance
@@ -147,7 +161,9 @@ pulumi destroy
 - `z`: use `source /usr/local/bin/z.sh` or interactive shell
 
 **Connection Options**:
-- **SSH**: `ssh -i keys/rde ubuntu@<ip>` (port 22)
+- **Easy SSH**: `./bin/ssh-connect` (auto-detects IP)
+- **Shell Alias**: `rde` (after sourcing bin/shell-function)  
+- **Manual SSH**: `ssh -i keys/rde ubuntu@<ip>` (port 22)
 - **Mosh**: `mosh --ssh="ssh -i keys/rde" ubuntu@<ip>` (UDP ports 60000-61000)
 
 ## Monitoring Running Instances
