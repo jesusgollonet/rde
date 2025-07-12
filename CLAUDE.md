@@ -44,7 +44,12 @@ Checks if any RDE instances are currently running using both Pulumi stack status
 
 ### Test Tools Installation
 ```bash
-./bin/test-tools
+# Test tools on a remote instance
+./bin/test-remote <instance-ip>
+
+# Or manually copy and run
+scp -i keys/rde bin/test-tools ubuntu@<ip>:/tmp/
+ssh -i keys/rde ubuntu@<ip> "chmod +x /tmp/test-tools && /tmp/test-tools"
 ```
 Validates that all development tools are properly installed and configured on a running instance. This script tests:
 - All Priority 1 and Priority 2 tools (executable presence and version checks)
@@ -99,7 +104,7 @@ pulumi destroy
 2. Build AMI: `./bin/build-image` (includes automated tool validation)
 3. Configure Pulumi: Set region and AMI ID in `instances/` directory
 4. Deploy instance using Pulumi from `instances/` directory
-5. Test deployed instance: SSH in and run `./bin/test-tools` for verification
+5. Test deployed instance: `./bin/test-remote <instance-ip>` for verification
 6. AMI rebuilds will automatically replace existing "rde-ami" image
 
 ## Important Notes

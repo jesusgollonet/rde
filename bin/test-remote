@@ -1,0 +1,35 @@
+#!/bin/bash
+
+set -e
+
+echo "=== Remote RDE Tools Test ==="
+
+# Check if IP provided as argument
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <instance-ip>"
+    echo "Example: $0 51.44.167.166"
+    echo
+    echo "To get the IP of running instance:"
+    echo "  ./bin/is-it-running"
+    echo "  # or from instances/ directory:"
+    echo "  cd instances && pulumi stack output publicIp"
+    exit 1
+fi
+
+INSTANCE_IP="$1"
+SSH_KEY="keys/rde"
+
+# Check if SSH key exists
+if [ ! -f "$SSH_KEY" ]; then
+    echo "❌ SSH key not found: $SSH_KEY"
+    echo "Generate it with: ./bin/generate-key"
+    exit 1
+fi
+
+echo "Testing tools on instance: $INSTANCE_IP"
+echo "Copying and running test script..."
+echo
+
+# Copy test script to instance and run it
+scp -i "$SSH_KEY" -o StrictHostKeyChecking=no "bin/test-tools" "ubuntu@$INSTANCE_IP:/tmp/test-tools"
+ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no "ubuntu@$INSTANCE_IP" "chmod +x /tmp/test-tools && /tmp/test-tools && rm /tmp/test-tools"
