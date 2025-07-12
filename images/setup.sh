@@ -4,9 +4,15 @@ set -e
 
 echo "=== RDE AMI Setup Script ==="
 echo "Setting up development environment..."
+echo "Started at: $(date)"
+
+# Function to log progress
+log_progress() {
+    echo "[$(date '+%H:%M:%S')] $1"
+}
 
 # Update system packages
-echo "Updating system packages..."
+log_progress "Updating system packages..."
 sudo apt-get update
 sudo apt-get upgrade -y
 
@@ -52,13 +58,35 @@ sudo apt-get install -y python3 python3-pip python3-venv python3-full pipx
 # Use system package for pipx instead of pip install
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/ubuntu/.bashrc
 
-# Install Docker
-echo "Installing Docker..."
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-sudo usermod -aG docker ubuntu
+# Install Docker with retry logic
+log_progress "Installing Docker..."
+install_docker() {
+    echo "Adding Docker GPG key..."
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    
+    echo "Adding Docker repository..."
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    
+    echo "Updating package list..."
+    sudo apt-get update
+    
+    echo "Installing Docker packages (this may take several minutes)..."
+    # Use timeout to prevent hanging
+    timeout 600 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin || {
+        echo "Docker installation timed out or failed, retrying..."
+        sleep 10
+        sudo apt-get clean
+        sudo apt-get update
+        timeout 600 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    }
+    
+    echo "Adding ubuntu user to docker group..."
+    sudo usermod -aG docker ubuntu
+    
+    echo "Docker installation completed successfully"
+}
+
+install_docker
 
 # Install productivity tools
 echo "Installing productivity tools..."
@@ -192,15 +220,18 @@ sudo chmod 600 /home/ubuntu/.ssh/authorized_keys
 sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/authorized_keys
 
 # Run GitHub preparation
-echo "Preparing GitHub authentication..."
+log_progress "Preparing GitHub authentication..."
 chmod +x /tmp/github-prep.sh
 /tmp/github-prep.sh
 
+log_progress "Final ownership setup..."
 # Set proper ownership for home directory
 sudo chown -R ubuntu:ubuntu /home/ubuntu
 
 echo "=== RDE AMI Setup Complete ==="
+echo "Completed at: $(date)"
 echo "Priority 1 tools: git, gh, node/pnpm, bun, python/pipx, docker, z, fzf, httpie, vim, tmux, mosh, zsh, atuin, claude"
 echo "Priority 2 tools: aws-cli, mkcert, ripgrep, bat, eza, pulumi"
 echo "Shell: zsh with custom configuration as default"
+echo "GitHub: SSH configuration and setup script ready"
 echo "Ready for development work!"
