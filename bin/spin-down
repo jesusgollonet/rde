@@ -1,0 +1,90 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/spin-down"
+
+main(){
+    check_prerequisites
+    check_running_instances
+    confirm_destruction
+    destroy_instance
+}
+
+check_prerequisites(){
+    echo "=== Checking Prerequisites ==="
+    
+    # Check if we're in the right directory
+    if [ ! -d "instances" ]; then
+        echo "❌ Error: instances/ directory not found"
+        echo "Please run this script from the RDE project root directory"
+        exit 1
+    fi
+    
+    # Check if pulumi is available
+    if ! command -v pulumi &> /dev/null; then
+        echo "❌ Error: Pulumi not found"
+        echo "Please install Pulumi: https://www.pulumi.com/docs/get-started/install/"
+        exit 1
+    fi
+    
+    echo "✅ Prerequisites check passed"
+    echo
+}
+
+check_running_instances(){
+    echo "=== Checking Running Instances ==="
+    
+    # Check if stack exists and has outputs
+    if ! (cd instances && pulumi stack output > /dev/null 2>&1); then
+        echo "❌ No Pulumi stack found or no active instances"
+        echo "Nothing to destroy"
+        exit 0
+    fi
+    
+    local instance_id=$(cd instances && pulumi stack output instanceId 2>/dev/null || echo "")
+    local public_ip=$(cd instances && pulumi stack output publicIp 2>/dev/null || echo "")
+    
+    if [ -n "$instance_id" ] && [ -n "$public_ip" ]; then
+        echo "🔍 Found running RDE instance:"
+        echo "Instance ID: $instance_id"
+        echo "Public IP: $public_ip"
+        echo
+    else
+        echo "❌ No instance information found in stack"
+        echo "Stack may already be destroyed or in an inconsistent state"
+        echo "You may need to run 'pulumi refresh' first"
+        exit 1
+    fi
+}
+
+confirm_destruction(){
+    echo "=== Confirmation Required ==="
+    echo "⚠️  This will DESTROY the RDE instance and all data on it!"
+    echo "Any unsaved work will be lost."
+    echo
+    
+    read -p "Are you sure you want to destroy the instance? (yes/no): " confirm
+    
+    if [ "$confirm" != "yes" ]; then
+        echo "❌ Operation cancelled"
+        exit 0
+    fi
+    
+    echo "✅ Destruction confirmed"
+    echo
+}
+
+destroy_instance(){
+    echo "=== Destroying RDE Instance ==="
+    
+    echo "Running pulumi destroy..."
+    (cd instances && pulumi destroy --yes)
+    
+    echo "✅ Instance destroyed successfully"
+    echo
+    echo "🗑️  RDE instance has been terminated"
+    echo "To spin up a new instance, run: ./bin/spin-up"
+}
+
+main

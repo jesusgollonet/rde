@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/spin-up"
+
+main(){
+    check_prerequisites
+    check_region_config
+    deploy_instance
+    get_instance_info
+}
+
+check_prerequisites(){
+    echo "=== Checking Prerequisites ==="
+    
+    # Check if we're in the right directory
+    if [ ! -d "instances" ]; then
+        echo "❌ Error: instances/ directory not found"
+        echo "Please run this script from the RDE project root directory"
+        exit 1
+    fi
+    
+    # Check if SSH key exists
+    if [ ! -f "keys/rde.pub" ]; then
+        echo "❌ Error: SSH key not found at keys/rde.pub"
+        echo "Please run: ./bin/generate-key"
+        exit 1
+    fi
+    
+    # Check if pulumi is available
+    if ! command -v pulumi &> /dev/null; then
+        echo "❌ Error: Pulumi not found"
+        echo "Please install Pulumi: https://www.pulumi.com/docs/get-started/install/"
+        exit 1
+    fi
+    
+    echo "✅ Prerequisites check passed"
+    echo
+}
+
+check_region_config(){
+    echo "=== Checking Region Configuration ==="
+    
+    local region=$(cd instances && pulumi config get region 2>/dev/null || echo "")
+    if [ -z "$region" ]; then
+        echo "❌ Error: No region configured"
+        echo "Please set the region:"
+        echo "  cd instances && pulumi config set region eu-west-3"
+        exit 1
+    fi
+    
+    echo "✅ Region configured: $region"
+    echo
+}
+
+deploy_instance(){
+    echo "=== Deploying RDE Instance ==="
+    
+    echo "Running pulumi up..."
+    (cd instances && pulumi up --yes)
+    
+    echo "✅ Instance deployed successfully"
+    echo
+}
+
+get_instance_info(){
+    echo "=== Instance Information ==="
+    
+    local instance_id=$(cd instances && pulumi stack output instanceId 2>/dev/null || echo "")
+    local public_ip=$(cd instances && pulumi stack output publicIp 2>/dev/null || echo "")
+    
+    if [ -n "$instance_id" ] && [ -n "$public_ip" ]; then
+        echo "🚀 RDE Instance Ready!"
+        echo "Instance ID: $instance_id"
+        echo "Public IP: $public_ip"
+        echo
+        echo "Connect with:"
+        echo "  ./bin/ssh-connect"
+        echo "  ssh -i keys/rde ubuntu@$public_ip"
+        echo "  mosh --ssh=\"ssh -i keys/rde\" ubuntu@$public_ip"
+    else
+        echo "❌ Error: Could not retrieve instance information"
+        echo "Check pulumi stack output for details"
+        exit 1
+    fi
+}
+
+main

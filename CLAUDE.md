@@ -36,11 +36,20 @@ This script:
 ```
 Creates SSH key pair in the `keys/` directory for instance access.
 
-### Check Running Status
+### Instance Management
 ```bash
+# Deploy a new RDE instance
+./bin/spin-up
+
+# Destroy the RDE instance
+./bin/spin-down
+
+# Check running status
 ./bin/is-it-running
 ```
-Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI.
+- `spin-up`: Creates and deploys a new RDE instance with prerequisite checks
+- `spin-down`: Safely destroys the instance with confirmation prompt
+- `is-it-running`: Checks if any RDE instances are currently running using both Pulumi stack status and AWS CLI
 
 ### Connect to Instance
 ```bash
