@@ -1,0 +1,77 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/export-key-qr"
+
+main(){
+    check_prerequisites
+    check_key_exists
+    generate_qr_code
+}
+
+check_prerequisites(){
+    echo "=== Checking Prerequisites ==="
+    
+    # Check if we're in the right directory
+    if [ ! -f "CLAUDE.md" ] || [ ! -d "bin" ]; then
+        echo "❌ Please run this script from the RDE project root directory"
+        exit 1
+    fi
+    
+    # Check if qrencode is available
+    if ! command -v qrencode &> /dev/null; then
+        echo "❌ qrencode not found. Install it with:"
+        echo "  macOS: brew install qrencode"
+        echo "  Linux: apt-get install qrencode"
+        exit 1
+    fi
+    
+    echo "✅ Prerequisites check passed"
+    echo
+}
+
+check_key_exists(){
+    echo "=== Checking SSH Key ==="
+    
+    if [ ! -f "keys/rde" ]; then
+        echo "❌ SSH private key not found: keys/rde"
+        echo "Generate it with: ./bin/generate-key"
+        exit 1
+    fi
+    
+    echo "✅ SSH key found"
+    echo
+}
+
+generate_qr_code(){
+    echo "=== Generating QR Code ==="
+    echo "⚠️  WARNING: This will display your private key as a QR code!"
+    echo "Make sure no one else can see your screen."
+    echo
+    
+    read -p "Continue? (yes/no): " confirm
+    
+    if [ "$confirm" != "yes" ]; then
+        echo "❌ Operation cancelled"
+        exit 0
+    fi
+    
+    echo
+    echo "📱 Scan this QR code with your iPad camera:"
+    echo "Then in Blink.sh: Keys → Add → Import from Clipboard → New RSA Key"
+    echo
+    
+    # Generate QR code for the private key
+    qrencode -t UTF8 < keys/rde
+    
+    echo
+    echo "✅ QR code generated successfully"
+    echo
+    echo "🔒 Security reminder:"
+    echo "- Clear your terminal history after use"
+    echo "- Make sure no one photographed the QR code"
+    echo "- The key is now ready to import in Blink.sh"
+}
+
+main

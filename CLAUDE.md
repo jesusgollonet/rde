@@ -78,6 +78,26 @@ The AMI includes GitHub preparation with SSH configuration. On first login, run 
 - Generate SSH key for GitHub authentication  
 - Get instructions for adding the key to GitHub
 
+### iPad/Mobile Access with Blink.sh
+```bash
+# Get connection info for Blink.sh setup
+./bin/show-connection-info
+
+# Export SSH key as QR code for iPad import
+./bin/export-key-qr
+```
+**Setup Steps for iPad:**
+1. **Import SSH Key**: Run `./bin/export-key-qr` and scan QR code with iPad camera
+2. **Add to Blink.sh**: Keys → Add → Import from Clipboard → New RSA Key
+3. **Configure Host**: Use `./bin/show-connection-info` for connection details
+4. **Connect**: Use `ssh rde` or `mosh rde` in Blink.sh
+
+**Benefits of Mosh on iPad:**
+- Survives network changes (WiFi to cellular)
+- Maintains connection during device sleep
+- Better performance on mobile networks
+- Uses UDP ports 60000-61000 (pre-configured)
+
 ### Test Tools Installation
 ```bash
 # Test tools on a remote instance

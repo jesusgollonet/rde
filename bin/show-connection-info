@@ -1,0 +1,90 @@
+#!/bin/bash
+
+set -e
+
+echo "bin/show-connection-info"
+
+main(){
+    check_prerequisites
+    get_instance_info
+    show_blink_setup
+}
+
+check_prerequisites(){
+    echo "=== Checking Prerequisites ==="
+    
+    # Check if we're in the right directory
+    if [ ! -d "instances" ]; then
+        echo "❌ Error: instances/ directory not found"
+        echo "Please run this script from the RDE project root directory"
+        exit 1
+    fi
+    
+    echo "✅ Prerequisites check passed"
+    echo
+}
+
+get_instance_info(){
+    echo "=== Getting Instance Information ==="
+    
+    # Check if stack exists and has outputs
+    if ! (cd instances && pulumi stack output > /dev/null 2>&1); then
+        echo "❌ No Pulumi stack found or no active instances"
+        echo "Deploy an instance with: ./bin/spin-up"
+        exit 1
+    fi
+    
+    INSTANCE_ID=$(cd instances && pulumi stack output instanceId 2>/dev/null || echo "")
+    PUBLIC_IP=$(cd instances && pulumi stack output publicIp 2>/dev/null || echo "")
+    AMI_ID=$(cd instances && pulumi stack output amiId 2>/dev/null || echo "")
+    
+    if [ -z "$PUBLIC_IP" ]; then
+        echo "❌ No instance information found"
+        echo "Make sure an instance is running with: ./bin/spin-up"
+        exit 1
+    fi
+    
+    echo "✅ Instance information retrieved"
+    echo
+}
+
+show_blink_setup(){
+    echo "=== Blink.sh Setup Information ==="
+    echo
+    echo "🔗 Instance Details:"
+    echo "  Instance ID: $INSTANCE_ID"
+    echo "  Public IP: $PUBLIC_IP"
+    echo "  AMI ID: $AMI_ID"
+    echo
+    echo "📱 Blink.sh Host Configuration:"
+    echo "  1. In Blink.sh, go to: Settings → Hosts → Add"
+    echo "  2. Configure the host:"
+    echo
+    echo "     Host: rde"
+    echo "     Hostname: $PUBLIC_IP"
+    echo "     Port: 22"
+    echo "     User: ubuntu"
+    echo "     Key: <your-imported-rde-key>"
+    echo
+    echo "🚀 Connection Commands:"
+    echo "  SSH: ssh rde"
+    echo "  Mosh: mosh rde"
+    echo
+    echo "💡 Import your SSH key first:"
+    echo "  1. Run: ./bin/export-key-qr"
+    echo "  2. Scan QR code with iPad camera"
+    echo "  3. In Blink.sh: Keys → Add → Import from Clipboard → New RSA Key"
+    echo "  4. Name the key 'rde' for easy reference"
+    echo
+    echo "🔒 Security Notes:"
+    echo "  - Mosh uses UDP ports 60000-61000 (already configured)"
+    echo "  - Keys are stored securely in iOS Keychain"
+    echo "  - Mosh connections survive network changes"
+    echo
+    echo "🔧 Troubleshooting:"
+    echo "  - If connection fails, try: ssh -v rde (for verbose output)"
+    echo "  - Check instance status: ./bin/is-it-running"
+    echo "  - For mosh issues, ensure UDP ports are open"
+}
+
+main
